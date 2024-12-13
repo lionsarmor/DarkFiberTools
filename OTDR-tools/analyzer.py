@@ -127,6 +127,7 @@ def generate_stacked_report(extracted_data):
 def generate_wide_report(extracted_data):
     """
     Generates the wide report where events are placed on the X-axis.
+    Ensures that Shot_Direction and Fiber_ID are the first columns.
     """
     # Create DataFrame from extracted JSON data
     df = pd.DataFrame(extracted_data)
@@ -254,7 +255,6 @@ def generate_report():
 
     except Exception as e:
         messagebox.showerror("Error", f"An unexpected error occurred: {e}")
-
 
 # Set up the main application window
 window = tk.Tk()
