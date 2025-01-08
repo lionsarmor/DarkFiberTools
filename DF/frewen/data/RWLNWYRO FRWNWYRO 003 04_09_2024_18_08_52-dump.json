@@ -1,0 +1,451 @@
+{
+  "filename": "RWLNWYRO FRWNWYRO 003 04_09_2024_18_08_52.sor",
+  "format": 2,
+  "version": "2.50",
+  "mapblock": {
+    "nbytes": 288,
+    "nblocks": 14
+  },
+  "blocks": {
+    "GenParams": {
+      "name": "GenParams",
+      "version": "2.50",
+      "size": 83,
+      "pos": 288,
+      "order": 0
+    },
+    "SupParams": {
+      "name": "SupParams",
+      "version": "2.50",
+      "size": 63,
+      "pos": 371,
+      "order": 1
+    },
+    "FxdParams": {
+      "name": "FxdParams",
+      "version": "2.50",
+      "size": 92,
+      "pos": 434,
+      "order": 2
+    },
+    "DataPts": {
+      "name": "DataPts",
+      "version": "2.50",
+      "size": 31942,
+      "pos": 526,
+      "order": 3
+    },
+    "KeyEvents": {
+      "name": "KeyEvents",
+      "version": "2.50",
+      "size": 914,
+      "pos": 32468,
+      "order": 4
+    },
+    "WaveMTSParams": {
+      "name": "WaveMTSParams",
+      "version": "2.50",
+      "size": 656,
+      "pos": 33382,
+      "order": 5
+    },
+    "WavetekTwoMTS": {
+      "name": "WavetekTwoMTS",
+      "version": "2.00",
+      "size": 1002,
+      "pos": 34038,
+      "order": 6
+    },
+    "WavetekThreeMTS": {
+      "name": "WavetekThreeMTS",
+      "version": "2.00",
+      "size": 20,
+      "pos": 35040,
+      "order": 7
+    },
+    "ActernaConfig": {
+      "name": "ActernaConfig",
+      "version": "2.00",
+      "size": 8601,
+      "pos": 35060,
+      "order": 8
+    },
+    "ActernaMiniCurve": {
+      "name": "ActernaMiniCurve",
+      "version": "2.00",
+      "size": 849,
+      "pos": 43661,
+      "order": 9
+    },
+    "JDSUEvenementsMTS": {
+      "name": "JDSUEvenementsMTS",
+      "version": "2.50",
+      "size": 5866,
+      "pos": 44510,
+      "order": 10
+    },
+    "BlocOtdrPrivate": {
+      "name": "BlocOtdrPrivate",
+      "version": "2.50",
+      "size": 21945,
+      "pos": 50376,
+      "order": 11
+    },
+    "ViaviExtraInfoSignatureBlock": {
+      "name": "ViaviExtraInfoSignatureBlock",
+      "version": "2.50",
+      "size": 174,
+      "pos": 72321,
+      "order": 12
+    },
+    "Cksum": {
+      "name": "Cksum",
+      "version": "2.50",
+      "size": 8,
+      "pos": 72495,
+      "order": 13
+    }
+  },
+  "GenParams": {
+    "language": "FR",
+    "cable ID": "ROUTE 401.202",
+    "fiber ID": "      #",
+    "fiber type": "G.652 (standard SMF)",
+    "wavelength": "1550 nm",
+    "location A": "RWLNWYRO",
+    "location B": "FRWNWYRO",
+    "cable code/fiber type": "",
+    "build condition": "CC (as-current)",
+    "user offset": "0",
+    "user offset distance": "0",
+    "operator": "jweeks",
+    "comments": "CHRKWYRO"
+  },
+  "SupParams": {
+    "supplier": "Viavi",
+    "OTDR": "T-BERD 4000 V2",
+    "OTDR S/N": "EBAH00178",
+    "module": "4126 MA",
+    "module S/N": "32601",
+    "software": "22.64",
+    "other": " "
+  },
+  "FxdParams": {
+    "date/time": "Tue Apr 09 19:08:52 2024 (1712711332 sec)",
+    "unit": "km (kilometers)",
+    "wavelength": "1550.0 nm",
+    "acquisition offset": 0,
+    "acquisition offset distance": 0,
+    "number of pulse width entries": 1,
+    "pulse width": "300 ns",
+    "sample spacing": "0.025 usec",
+    "num data points": 15961,
+    "index": "1.465000",
+    "BC": "-81.00 dB",
+    "num averages": 137040,
+    "averaging time": "6 sec",
+    "range": 81.6550754631058,
+    "acquisition range distance": 816,
+    "front panel offset": 0,
+    "noise floor level": 55000,
+    "noise floor scaling factor": 1000,
+    "power offset first point": 35522,
+    "loss thr": "0.010 dB",
+    "refl thr": "-65.000 dB",
+    "EOT thr": "6.000 dB",
+    "trace type": "ST[standard trace]",
+    "X1": 0,
+    "Y1": 0,
+    "X2": 0,
+    "Y2": 0,
+    "resolution": 5.115912252559727
+  },
+  "DataPts": {
+    "_datapts_params": {
+      "xscaling": 1,
+      "offset": "STV"
+    },
+    "num data points": 15961,
+    "num traces": 1,
+    "num data points 2": 15961,
+    "scaling factor": 1.47,
+    "max before offset": 67.745,
+    "min before offset": 25.997
+  },
+  "KeyEvents": {
+    "num events": 20,
+    "event 1": {
+      "type": "1F99992P [unknown type 1F99992P]",
+      "distance": "0.000",
+      "slope": "0.000",
+      "splice loss": "0.216",
+      "refl loss": "-37.880",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 2": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "3.428",
+      "slope": "0.201",
+      "splice loss": "0.243",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 3": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "4.134",
+      "slope": "0.194",
+      "splice loss": "-0.056",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 4": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "7.756",
+      "slope": "0.229",
+      "splice loss": "1.266",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 5": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "9.337",
+      "slope": "0.252",
+      "splice loss": "0.071",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 6": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "12.283",
+      "slope": "0.227",
+      "splice loss": "0.112",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 7": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "18.208",
+      "slope": "0.168",
+      "splice loss": "0.029",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 8": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "22.612",
+      "slope": "0.202",
+      "splice loss": "0.307",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 9": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "26.183",
+      "slope": "0.293",
+      "splice loss": "0.038",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 10": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "27.590",
+      "slope": "0.347",
+      "splice loss": "-0.275",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 11": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "31.898",
+      "slope": "0.212",
+      "splice loss": "0.319",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 12": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "35.208",
+      "slope": "0.225",
+      "splice loss": "0.076",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 13": {
+      "type": "1F9999LS {auto} reflection",
+      "distance": "36.993",
+      "slope": "0.203",
+      "splice loss": "0.206",
+      "refl loss": "-53.130",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 14": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "41.894",
+      "slope": "0.220",
+      "splice loss": "0.220",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 15": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "47.010",
+      "slope": "0.210",
+      "splice loss": "0.263",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 16": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "58.986",
+      "slope": "0.206",
+      "splice loss": "0.107",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 17": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "60.833",
+      "slope": "0.155",
+      "splice loss": "0.204",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 18": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "61.140",
+      "slope": "0.270",
+      "splice loss": "-0.053",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 19": {
+      "type": "0F9999LS {auto} loss/drop/gain",
+      "distance": "62.256",
+      "slope": "0.157",
+      "splice loss": "0.460",
+      "refl loss": "0.000",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "event 20": {
+      "type": "1E99992P [unknown type 1E99992P]",
+      "distance": "74.186",
+      "slope": "0.000",
+      "splice loss": "0.000",
+      "refl loss": "-16.900",
+      "comments": " ",
+      "end of prev": "0.000",
+      "start of curr": "0.000",
+      "end of curr": "0.000",
+      "start of next": "0.000",
+      "peak": "0.000"
+    },
+    "Summary": {
+      "total loss": 20.046,
+      "ORL": 0.0,
+      "loss start": 0.0,
+      "loss end": 74.185844,
+      "ORL start": 0.0,
+      "ORL finish": 0.0
+    }
+  },
+  "Cksum": {
+    "checksum_ours": 12247,
+    "checksum": 47184,
+    "match": false
+  }
+}

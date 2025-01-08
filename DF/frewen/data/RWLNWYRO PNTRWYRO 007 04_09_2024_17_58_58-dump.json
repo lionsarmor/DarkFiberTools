@@ -1,0 +1,91 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox, Scrollbar, Listbox
+import json
+
+
+def process_json_files(file_paths):
+    """
+    Process JSON files while checking for the presence of 'records' safely.
+    Logs and skips files without valid 'records' data.
+    """
+    for file_path in file_paths:
+        try:
+            with open(file_path, 'r') as file:
+                json_data = json.load(file)
+
+                # Check if 'records' key exists
+                if 'records' in json_data:
+                    for record in json_data['records']:
+                        # Example: Do something with each record
+                        print("Processing record:", record)
+                else:
+                    # Log the missing key issue
+                    print(f"Skipping file {file_path} because 'records' key is missing.")
+        except Exception as e:
+            print(f"Failed to process file {file_path}: {e}")
+
+
+def select_files():
+    """
+    Opens a file dialog to select multiple JSON files.
+    """
+    file_paths = filedialog.askopenfilenames(
+        title="Select JSON files",
+        filetypes=[("JSON Files", "*.json")],
+    )
+    if file_paths:
+        # Update window with file names
+        window.file_paths = file_paths
+        update_file_list(file_paths)
+
+
+def update_file_list(file_paths):
+    """
+    Updates the scrollable list window with the names of uploaded files.
+    """
+    file_listbox.delete(0, tk.END)  # Clear previous entries
+    for path in file_paths:
+        file_listbox.insert(tk.END, path)
+
+
+def generate_report():
+    """
+    Process the selected JSON files and generate a report.
+    """
+    if not window.file_paths:
+        messagebox.showerror("Error", "No files selected for processing.")
+        return
+
+    try:
+        process_json_files(window.file_paths)
+        messagebox.showinfo("Success", "Processing completed.")
+    except Exception as e:
+        messagebox.showerror("Processing Error", f"An error occurred: {e}")
+
+
+# Set up the main application window
+window = tk.Tk()
+window.title("JSON File Analyzer")
+window.geometry("700x500")
+
+# Buttons
+btn_select_files = tk.Button(window, text="Select Files", command=select_files)
+btn_select_files.pack(pady=5)
+
+btn_generate_report = tk.Button(window, text="Generate Report", command=generate_report)
+btn_generate_report.pack(pady=5)
+
+# Scrollable Listbox to show selected JSON file names
+file_listbox_frame = tk.Frame(window)
+file_listbox_frame.pack(pady=10, fill=tk.BOTH, expand=True)
+
+file_listbox = tk.Listbox(file_listbox_frame, height=15, width=80)
+scrollbar = Scrollbar(file_listbox_frame, orient=tk.VERTICAL, command=file_listbox.yview)
+file_listbox.config(yscrollcommand=scrollbar.set)
+
+file_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+window.file_paths = []  # Initialize an empty list to store selected file paths
+
+window.mainloop()
