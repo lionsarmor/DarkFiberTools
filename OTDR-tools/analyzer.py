@@ -209,9 +209,10 @@ def generate_report():
                 workbook = writer.book
                 worksheet = writer.sheets['Sheet1']
 
-                highlight_format = workbook.add_format({'bg_color': '#D9EAD3', 'align': 'left'})
-                for col_num, col in enumerate(df.columns):
-                    worksheet.set_column(col_num, col_num, None, highlight_format)
+                # Adjust the width of each column based on its contents plus 25%
+                for idx, col in enumerate(df.columns):
+                    max_length = max(df[col].apply(lambda x: len(str(x))).max(), len(col))
+                    worksheet.set_column(idx, idx, max_length * 1.25)
 
             messagebox.showinfo("Success", f"Report saved to: {save_path}")
         else:
