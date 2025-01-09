@@ -12,7 +12,6 @@ def process_json_and_extract(file_paths):
     Returns a list of dictionaries with extracted fields to match the format of the XLSX report.
     """
     extracted_data = []
-
     for file_path in file_paths:
         try:
             with open(file_path, 'r') as file:
@@ -32,7 +31,6 @@ def process_json_and_extract(file_paths):
                 events = json_data.get("KeyEvents", {})
                 event_data = []
                 max_distance = 0
-
                 for event_key, event_info in events.items():
                     if event_key.startswith("event"):
                         distance = float(event_info.get("distance", 0))
@@ -73,6 +71,35 @@ def process_json_and_extract(file_paths):
             print(f"Error processing {file_path}: {e}")
 
     return extracted_data
+
+
+def apply_conditional_formatting(worksheet, df, workbook):
+    """
+    Applies conditional formatting to the Comments column based on the content.
+    """
+    comments_col_idx = df.columns.get_loc('Comments')  # 0-based index for the Comments column
+    first_row = 1  # First data row (Excel row 2, skipping header)
+    last_row = len(df)  # Last data row
+
+    # Formats
+    format_critical = workbook.add_format({'bg_color': '#FF0000', 'align': 'left', 'bold': True})  # Red
+    format_warning = workbook.add_format({'bg_color': '#FFA500', 'align': 'left', 'bold': True})  # Orange
+    format_pass = workbook.add_format({'bg_color': '#D9EAD3', 'align': 'left', 'bold': True})  # Green
+
+    # Apply conditional formatting rules
+    worksheet.conditional_format(
+        first_row, comments_col_idx, last_row, comments_col_idx,
+        {'type': 'text', 'criteria': 'containing', 'value': 'Possible break', 'format': format_critical}
+    )
+    worksheet.conditional_format(
+        first_row, comments_col_idx, last_row, comments_col_idx,
+        {'type': 'text', 'criteria': 'containing', 'value': 'Possible microbend', 'format': format_warning}
+    )
+    worksheet.conditional_format(
+        first_row, comments_col_idx, last_row, comments_col_idx,
+        {'type': 'text', 'criteria': 'containing', 'value': 'Pass', 'format': format_pass}
+    )
+
 
 def generate_stacked_report(extracted_data):
     """
@@ -159,19 +186,6 @@ def generate_wide_report(extracted_data):
 
     return pd.DataFrame(wide_report_data)
 
-def select_files():
-    """
-    Opens a file dialog to select multiple JSON files.
-    """
-    file_paths = filedialog.askopenfilenames(
-        title="Select JSON files",
-        filetypes=[("JSON Files", "*.json")],
-    )
-    if file_paths:
-        json_file_listbox.delete(0, tk.END)  # Clear previous entries
-        for path in file_paths:
-            json_file_listbox.insert(tk.END, path)
-
 def generate_report():
     """
     Processes the selected JSON files, generates either a wide or stacked report, and saves it as an Excel file.
@@ -188,6 +202,39 @@ def generate_report():
         if not extracted_data:
             messagebox.showerror("Error", "No valid data extracted.")
             return
+
+        # Retrieve user-defined tolerances
+        user_pass_tolerance = pass_tolerance.get()
+        user_warning_tolerance = warning_tolerance.get()
+
+        # Analyze the entire run per shot direction and update comments
+        for record in extracted_data:
+            total_splice_loss = 0
+            total_distance = 0
+            critical_flag = False
+            warning_flag = False
+
+            # Analyze each event in the record
+            event_counter = 1
+            while f"Event_{event_counter}" in record:
+                splice_loss = float(record.get(f"Event_{event_counter}_Splice_Loss", 0) or 0)
+                if splice_loss > user_warning_tolerance:  # Critical
+                    record[f"Event_{event_counter}_Comments"] = "Possible break"
+                    critical_flag = True
+                elif splice_loss > user_pass_tolerance:  # Warning
+                    record[f"Event_{event_counter}_Comments"] = "Possible microbend"
+                    warning_flag = True
+                else:  # Pass
+                    record[f"Event_{event_counter}_Comments"] = "Pass"
+                event_counter += 1
+
+            # Consolidate the overall comment for the shot direction
+            if critical_flag:
+                record["Comments"] = "Critical issues detected (Possible break)"
+            elif warning_flag:
+                record["Comments"] = "Warnings detected (Possible microbend)"
+            else:
+                record["Comments"] = "Pass"
 
         # Create DataFrame from extracted JSON data
         if wide_report_var.get():
@@ -209,10 +256,13 @@ def generate_report():
                 workbook = writer.book
                 worksheet = writer.sheets['Sheet1']
 
-                # Adjust the width of each column based on its contents plus 25%
+                # Adjust the width of each column
                 for idx, col in enumerate(df.columns):
                     max_length = max(df[col].apply(lambda x: len(str(x))).max(), len(col))
-                    worksheet.set_column(idx, idx, max_length * 1.25)
+                    worksheet.set_column(idx, idx, max_length * 1.25, workbook.add_format({'align': 'left'}))
+
+                # Apply conditional formatting
+                apply_conditional_formatting(worksheet, df, workbook)
 
             messagebox.showinfo("Success", f"Report saved to: {save_path}")
         else:
@@ -220,6 +270,114 @@ def generate_report():
 
     except Exception as e:
         messagebox.showerror("Error", f"An unexpected error occurred: {e}")
+
+def create_tolerances_tab(notebook):
+    """
+    Creates the Tolerances tab where users can input their own tolerances.
+    """
+    tolerances_tab = ttk.Frame(notebook)
+    notebook.add(tolerances_tab, text="Tolerances")
+
+    tk.Label(tolerances_tab, text="Set Tolerances for Fiber Analysis").pack(pady=10)
+
+    # Tolerance input variables
+    global pass_tolerance, warning_tolerance
+    pass_tolerance = tk.DoubleVar(value=0.3)
+    warning_tolerance = tk.DoubleVar(value=0.6)
+
+    # Pass Tolerance
+    tk.Label(tolerances_tab, text="Maximum Splice Loss for Pass (dB):").pack(pady=5)
+    tk.Entry(tolerances_tab, textvariable=pass_tolerance).pack(pady=5)
+
+    # Warning Tolerance
+    tk.Label(tolerances_tab, text="Maximum Splice Loss for Warning (dB):").pack(pady=5)
+    tk.Entry(tolerances_tab, textvariable=warning_tolerance).pack(pady=5)
+
+    tk.Label(tolerances_tab, text="Critical issues detected if splice loss exceeds Warning tolerance.").pack(pady=10)
+
+def select_files():
+    """
+    Opens a file dialog to select multiple JSON files.
+    """
+    file_paths = filedialog.askopenfilenames(
+        title="Select JSON files",
+        filetypes=[("JSON Files", "*.json")],
+    )
+    if file_paths:
+        json_file_listbox.delete(0, tk.END)  # Clear previous entries
+        for path in file_paths:
+            json_file_listbox.insert(tk.END, path)
+
+def create_json_processing_tab(notebook):
+    """
+    Creates the JSON Processing tab for the application.
+    """
+    json_tab = ttk.Frame(notebook)
+    notebook.add(json_tab, text="JSON Processing")
+
+    tk.Label(json_tab, text="JSON Processing Tab").pack(pady=5)
+
+    btn_select_files = tk.Button(json_tab, text="Select JSON Files", command=select_files)
+    btn_select_files.pack(pady=5)
+
+    btn_generate_report = tk.Button(json_tab, text="Generate Report", command=generate_report)
+    btn_generate_report.pack(pady=5)
+
+    json_file_listbox_frame = tk.Frame(json_tab)
+    json_file_listbox_frame.pack(pady=10, fill=tk.BOTH, expand=True)
+
+    global json_file_listbox
+    json_file_listbox = tk.Listbox(json_file_listbox_frame, height=15, width=80)
+    json_scrollbar = Scrollbar(json_file_listbox_frame, orient=tk.VERTICAL, command=json_file_listbox.yview)
+    json_file_listbox.config(yscrollcommand=json_scrollbar.set)
+
+    json_file_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    json_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    global wide_report_var
+    wide_report_var = tk.BooleanVar()
+    chk_wide_report = tk.Checkbutton(json_tab, text="Generate Wide Report", variable=wide_report_var)
+    chk_wide_report.pack(pady=10)
+
+def create_sor_parsing_tab(notebook):
+    """
+    Creates the .sor Parsing tab for the application.
+    """
+    sor_tab = ttk.Frame(notebook)
+    notebook.add(sor_tab, text=".sor Parsing")
+
+    global sor_input_var, sor_output_var
+    sor_input_var = tk.StringVar()
+    sor_output_var = tk.StringVar()
+
+    tk.Label(sor_tab, text="Input Folder (Containing .sor Files):").pack(pady=5)
+    tk.Entry(sor_tab, textvariable=sor_input_var, width=60).pack(pady=5)
+    tk.Button(sor_tab, text="Select Input Folder", command=lambda: sor_input_var.set(filedialog.askdirectory())).pack(pady=5)
+
+    tk.Label(sor_tab, text="Output Folder (For Parsed Files):").pack(pady=5)
+    tk.Entry(sor_tab, textvariable=sor_output_var, width=60).pack(pady=5)
+    tk.Button(sor_tab, text="Select Output Folder", command=lambda: sor_output_var.set(filedialog.askdirectory())).pack(pady=5)
+
+    def parse_sor_files():
+        input_folder = sor_input_var.get()
+        output_folder = sor_output_var.get()
+        rbOTDR_path = "./rbOTDR.rb"
+
+        if not os.path.isdir(input_folder) or not os.path.isdir(output_folder):
+            messagebox.showerror("Error", "Select valid input and output folders.")
+            return
+
+        for root, _, files in os.walk(input_folder):
+            for file in files:
+                if file.endswith(".sor"):
+                    try:
+                        subprocess.run([rbOTDR_path, os.path.join(root, file), output_folder], check=True)
+                    except Exception as e:
+                        messagebox.showerror("Error", f"Failed to parse {file}: {e}")
+        messagebox.showinfo("Success", ".sor files parsed successfully.")
+
+    btn_parse_sor = tk.Button(sor_tab, text="Parse .sor Files", command=parse_sor_files)
+    btn_parse_sor.pack(pady=10)
 
 # Main application window
 window = tk.Tk()
@@ -230,69 +388,10 @@ window.geometry("800x600")
 notebook = ttk.Notebook(window)
 notebook.pack(fill=tk.BOTH, expand=True)
 
-# Tab 1: JSON Processing
-json_tab = ttk.Frame(notebook)
-notebook.add(json_tab, text="JSON Processing")
-
-# Widgets for JSON Processing
-tk.Label(json_tab, text="JSON Processing Tab").pack(pady=5)
-
-btn_select_files = tk.Button(json_tab, text="Select JSON Files", command=select_files)
-btn_select_files.pack(pady=5)
-
-btn_generate_report = tk.Button(json_tab, text="Generate Report", command=generate_report)
-btn_generate_report.pack(pady=5)
-
-json_file_listbox_frame = tk.Frame(json_tab)
-json_file_listbox_frame.pack(pady=10, fill=tk.BOTH, expand=True)
-
-json_file_listbox = tk.Listbox(json_file_listbox_frame, height=15, width=80)
-json_scrollbar = Scrollbar(json_file_listbox_frame, orient=tk.VERTICAL, command=json_file_listbox.yview)
-json_file_listbox.config(yscrollcommand=json_scrollbar.set)
-
-json_file_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-json_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-# Checkboxes for report format
-wide_report_var = tk.BooleanVar()
-chk_wide_report = tk.Checkbutton(json_tab, text="Generate Wide Report", variable=wide_report_var)
-chk_wide_report.pack(pady=10)
-
-# Tab 2: .sor Parsing
-sor_tab = ttk.Frame(notebook)
-notebook.add(sor_tab, text=".sor Parsing")
-
-sor_input_var = tk.StringVar()
-sor_output_var = tk.StringVar()
-
-tk.Label(sor_tab, text="Input Folder (Containing .sor Files):").pack(pady=5)
-tk.Entry(sor_tab, textvariable=sor_input_var, width=60).pack(pady=5)
-tk.Button(sor_tab, text="Select Input Folder", command=lambda: sor_input_var.set(filedialog.askdirectory())).pack(pady=5)
-
-tk.Label(sor_tab, text="Output Folder (For Parsed Files):").pack(pady=5)
-tk.Entry(sor_tab, textvariable=sor_output_var, width=60).pack(pady=5)
-tk.Button(sor_tab, text="Select Output Folder", command=lambda: sor_output_var.set(filedialog.askdirectory())).pack(pady=5)
-
-def parse_sor_files():
-    input_folder = sor_input_var.get()
-    output_folder = sor_output_var.get()
-    rbOTDR_path = "./rbOTDR.rb"
-
-    if not os.path.isdir(input_folder) or not os.path.isdir(output_folder):
-        messagebox.showerror("Error", "Select valid input and output folders.")
-        return
-
-    for root, _, files in os.walk(input_folder):
-        for file in files:
-            if file.endswith(".sor"):
-                try:
-                    subprocess.run([rbOTDR_path, os.path.join(root, file), output_folder], check=True)
-                except Exception as e:
-                    messagebox.showerror("Error", f"Failed to parse {file}: {e}")
-    messagebox.showinfo("Success", ".sor files parsed successfully.")
-
-btn_parse_sor = tk.Button(sor_tab, text="Parse .sor Files", command=parse_sor_files)
-btn_parse_sor.pack(pady=10)
+# Add JSON Processing, .sor Parsing, and Tolerances tabs
+create_json_processing_tab(notebook)
+create_sor_parsing_tab(notebook)
+create_tolerances_tab(notebook)
 
 # Run the application
 window.mainloop()
