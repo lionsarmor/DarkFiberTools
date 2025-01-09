@@ -75,31 +75,43 @@ def process_json_and_extract(file_paths):
 
 def apply_conditional_formatting(worksheet, df, workbook):
     """
-    Applies conditional formatting to the Comments column based on the content.
+    Applies conditional formatting to the Comments column or Event_X_Comments columns based on the report type.
     """
-    comments_col_idx = df.columns.get_loc('Comments')  # 0-based index for the Comments column
-    first_row = 1  # First data row (Excel row 2, skipping header)
-    last_row = len(df)  # Last data row
-
     # Formats
     format_critical = workbook.add_format({'bg_color': '#FF0000', 'align': 'left', 'bold': True})  # Red
     format_warning = workbook.add_format({'bg_color': '#FFA500', 'align': 'left', 'bold': True})  # Orange
     format_pass = workbook.add_format({'bg_color': '#D9EAD3', 'align': 'left', 'bold': True})  # Green
 
-    # Apply conditional formatting rules
-    worksheet.conditional_format(
-        first_row, comments_col_idx, last_row, comments_col_idx,
-        {'type': 'text', 'criteria': 'containing', 'value': 'Possible break', 'format': format_critical}
-    )
-    worksheet.conditional_format(
-        first_row, comments_col_idx, last_row, comments_col_idx,
-        {'type': 'text', 'criteria': 'containing', 'value': 'Possible microbend', 'format': format_warning}
-    )
-    worksheet.conditional_format(
-        first_row, comments_col_idx, last_row, comments_col_idx,
-        {'type': 'text', 'criteria': 'containing', 'value': 'Pass', 'format': format_pass}
-    )
-
+    # Check if it is a wide or stacked report
+    if "Comments" in df.columns:  # Stacked report
+        comments_col_idx = df.columns.get_loc("Comments")  # Get index of the Comments column
+        worksheet.conditional_format(
+            1, comments_col_idx, len(df), comments_col_idx,  # First data row to last data row
+            {'type': 'text', 'criteria': 'containing', 'value': 'Possible break', 'format': format_critical}
+        )
+        worksheet.conditional_format(
+            1, comments_col_idx, len(df), comments_col_idx,  # First data row to last data row
+            {'type': 'text', 'criteria': 'containing', 'value': 'Possible microbend', 'format': format_warning}
+        )
+        worksheet.conditional_format(
+            1, comments_col_idx, len(df), comments_col_idx,  # First data row to last data row
+            {'type': 'text', 'criteria': 'containing', 'value': 'Pass', 'format': format_pass}
+        )
+    else:  # Wide report
+        for col_idx, col_name in enumerate(df.columns):
+            if col_name.endswith("_Comments"):  # Apply formatting to Event_X_Comments columns
+                worksheet.conditional_format(
+                    1, col_idx, len(df), col_idx,  # First data row to last data row
+                    {'type': 'text', 'criteria': 'containing', 'value': 'Possible break', 'format': format_critical}
+                )
+                worksheet.conditional_format(
+                    1, col_idx, len(df), col_idx,  # First data row to last data row
+                    {'type': 'text', 'criteria': 'containing', 'value': 'Possible microbend', 'format': format_warning}
+                )
+                worksheet.conditional_format(
+                    1, col_idx, len(df), col_idx,  # First data row to last data row
+                    {'type': 'text', 'criteria': 'containing', 'value': 'Pass', 'format': format_pass}
+                )
 
 def generate_stacked_report(extracted_data):
     """
