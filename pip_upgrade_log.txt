@@ -1,3 +1,0 @@
-Requirement already satisfied: pip in c:\users\jweeks\desktop\darkfibertools\otdr-tools\venv\lib\site-packages (24.3.1)
-Requirement already satisfied: setuptools in c:\users\jweeks\desktop\darkfibertools\otdr-tools\venv\lib\site-packages (75.8.0)
-Requirement already satisfied: wheel in c:\users\jweeks\desktop\darkfibertools\otdr-tools\venv\lib\site-packages (0.45.1)

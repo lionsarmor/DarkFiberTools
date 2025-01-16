@@ -1,6 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:: Set the path for the setup log file (explicitly specify the path to the root of darkfibertools folder)
+set LOGFILE=%~dp0setup.log
+
 :: Step 1: Check for Python Installation
 echo Checking for Python installation...
 where python >nul 2>&1
@@ -29,9 +32,9 @@ if %ERRORLEVEL% neq 0 (
 
 :: Step 3: Create Python Virtual Environment
 echo Setting up Python virtual environment...
-python -m venv venv > setup.log 2>&1
+python -m venv venv >> %LOGFILE% 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo [ERROR] Failed to create Python virtual environment. Check setup.log for details.
+    echo [ERROR] Failed to create Python virtual environment. Check %LOGFILE% for details.
     pause
     exit /b 1
 ) else (
@@ -41,7 +44,7 @@ if %ERRORLEVEL% neq 0 (
 :: Step 4: Activate the virtual environment
 if exist venv\Scripts\activate.bat (
     echo Activating Python virtual environment...
-    call venv\Scripts\activate.bat
+    call venv\Scripts\activate.bat >> %LOGFILE% 2>&1
 ) else (
     echo [ERROR] Failed to locate virtual environment activation script.
     pause
@@ -57,20 +60,26 @@ echo Installing required Python dependencies...
     echo xlsxwriter
 )
 
-pip install -r requirements.txt >> setup.log 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo [ERROR] Some Python dependencies failed to install. Check setup.log for details.
+if exist requirements.txt (
+    pip install -r requirements.txt >> %LOGFILE% 2>&1
+    if %ERRORLEVEL% neq 0 (
+        echo [ERROR] Some Python dependencies failed to install. Check %LOGFILE% for details.
+        pause
+        exit /b 1
+    ) else (
+        echo [SUCCESS] Python dependencies installed.
+    )
+) else (
+    echo [ERROR] requirements.txt not found.
     pause
     exit /b 1
-) else (
-    echo [SUCCESS] Python dependencies installed.
 )
 
-:: Step 6: Install Required Ruby Gems if Missing
+:: Step 6: Install Required Ruby Gems
 echo Checking and installing required Ruby gems...
 
 :: Define the required gems
-set gems=read crc
+set gems=crc
 
 :: Loop through each gem
 for %%G in (%gems%) do (
@@ -78,30 +87,38 @@ for %%G in (%gems%) do (
     gem list %%G -i >nul 2>&1
     if !ERRORLEVEL! neq 0 (
         echo [INFO] Ruby gem %%G not found. Installing...
-        gem install %%G --no-document >> setup.log 2>&1
+        gem install %%G --no-document >> %LOGFILE% 2>&1
         if !ERRORLEVEL! neq 0 (
-            echo [ERROR] Failed to install Ruby gem %%G. Check setup.log for details.
+            echo [ERROR] Failed to install Ruby gem %%G. Check %LOGFILE% for details.
             pause
             exit /b 1
         ) else (
-            echo [SUCCESS] Ruby gem %%G installed.
+            echo [INFO] Gem %%G installed.
         )
     ) else (
         echo [SUCCESS] Ruby gem %%G is already installed.
     )
+
+    :: After installation, verify the gem is available
+    echo Verifying gem %%G installation...
+    gem list %%G -i >nul 2>&1
+    if !ERRORLEVEL! neq 0 (
+        echo [ERROR] Gem %%G installation failed. Check %LOGFILE% for details.
+        pause
+        exit /b 1
+    ) else (
+        echo [SUCCESS] Ruby gem %%G installed and verified.
+    )
 )
-
-echo All required Ruby gems are installed.
-pause
-
 
 :: Step 7: Verify Installations
 echo Verifying installations...
-python --version
-pip list
-ruby --version
-gem list
+python --version >> %LOGFILE% 2>&1
+pip list >> %LOGFILE% 2>&1
+ruby --version >> %LOGFILE% 2>&1
+gem list >> %LOGFILE% 2>&1
 
 :: Final Completion
 echo [SUCCESS] Setup complete! Python, Ruby, and all dependencies are installed.
+echo Log file can be found at %LOGFILE%.
 pause
