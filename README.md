@@ -1,175 +1,70 @@
+# rbOTDR: Simple OTDR SOR file parse written in Ruby
 
-# DarkFiberTools Setup and Usage Guide
+The SOR ("Standard OTDR Record") data format is used to store OTDR 
+([optical time-domain
+reflectometer](http://https://en.wikipedia.org/wiki/Optical_time-domain_reflectometer)
+) fiber data.  The format is defined by the Telcordia [SR-4731, issue
+2](http://telecom-info.telcordia.com/site-cgi/ido/docs.cgi?ID=SEARCH&DOCUMENT=SR-4731&)
+standard.  While it is a standard, it is unfortunately not open, in
+that the specifics of the data format are not openly available.  You
+can buy the standards document from Telcordia for $750 US (as of this
+writing), but this was beyond my budget. (And likely comes with
+all sorts of licensing restrictions. I wouldn't know; I have never
+seen the document!)
 
-This guide will help you set up the DarkFiberTools application on Windows, macOS, and Linux. It covers installation steps, setting up the virtual environment, installing dependencies, and launching the application.
 
-## Windows Instructions
+There are several freely available OTDR trace readers available for
+download on the web, but most do not allow exporting the trace curve
+into, say, a CSV file for further analysis, and only one that I've
+found that runs natively on Linux (but without source code; although
+some of these do work in the Wine emulator).  There have been requests
+on various Internet forums asking for information on how to extract
+the trace data, but I am not aware of anyone providing any answers
+beyond pointing to the free readers and the Telcordia standard.
 
-### Step 1: Install Dependencies
 
-1. **Install Python**  
-   If you don't have Python installed, download and install it from the official Python website: [https://www.python.org/downloads/](https://www.python.org/downloads/).
+Fortunately the data format is not particularly hard to decipher.  The
+table of contents on the Telcordia [SR-4731, issue
+2](http://telecom-info.telcordia.com/site-cgi/ido/docs.cgi?ID=SEARCH&DOCUMENT=SR-4731&)
+page provides several clues, as does the Wikipedia page on [optical
+time-domain
+reflectometer](http://https://en.wikipedia.org/wiki/Optical_time-domain_reflectometer).
 
-   Ensure to add Python to your PATH during installation.
 
-2. **Install Ruby**  
-   To install Ruby, follow these steps:
-   - Download Ruby from [https://rubyinstaller.org/](https://rubyinstaller.org/).
-   - Run the installer and ensure that Ruby is added to your system PATH.
-   - Optionally, you can install RubyGems if it’s not bundled with the installer.
+Using a binary-file editor/viewer and comparing the outputs from
+some free OTDR SOR file readers, I was able to piece together most of
+the encoding in the SOR data format and written a simple program (in
+Ruby) that parses the SOR file and dumps the trace data into a file.
+(For a more detailed description, other than reading the source code,
+see [my blog
+post](http://morethanfootnotes.blogspot.com/2015/07/the-otdr-optical-time-domain.html?view=sidebar)).
 
-3. **Run the Setup Script**
-   - Right-click on `setup.bat` and select **Run as administrator**. This will install all necessary dependencies for the application.
 
-### Step 2: Launch the Application
+Presented here for your entertainment are my findings, in the hope
+that it will be useful to other people.  But be aware that the
+information provided here is based on guess work from looking at a
+limited number of sample files.  I can not guarantee that there are no
+mistakes, or that I have uncovered all possible exceptions to the
+rules that I have deduced from the sample files.  **use it at your own
+risk! You have been warned!** 
 
-1. **Launch the Program**
-   - Double-click on `launch.bat` to run the application. It will activate the virtual environment (if it exists) and then execute `analyzer.py`.
+The program was ported over from my original [pyOTDR](https://github.com/sid5432/pyOTDR)
+written in Python (which was ported over from my earlier [pubOTDR](https://github.com/sid5432/pubOTDR) 
+written in Perl).  To parse an OTDR SOR file, run the program as
 
-2. **Troubleshooting**
-   - If you face any errors, they will appear in the console. Make sure that all dependencies are installed properly, and check the steps below if you need to manually install them.
+    rbOTDR.rb myfile.sor
 
----
+where "myfile.sor" is the name (path) to your SOR file.  A OTDR trace file "myfile-trace.dat" and a JSON file "myfile-dump.json" will be produced.
+There is also a Clojure version, [cljotdr](https://github.com/sid5432/cljotdr); this will be of interest to people looking for a Java version, since Clojure runs on top of a Java Virtual Machine (JVM).
 
-## macOS Instructions
 
-### Step 1: Install Dependencies
+## Dependencies
 
-1. **Install Python**  
-   If you don't have Python installed, open a terminal and install it via Homebrew:
-   ```bash
-   brew install python
-   ```
+This program requires the [crc](https://github.com/dearblue/ruby-crc) module. To install this module, run
 
-2. **Install Ruby**  
-   To install Ruby, run:
-   ```bash
-   brew install ruby
-   ```
+    gem install crc
 
-3. **Install Dependencies Manually**
-   - After installing Python and Ruby, you need to install the Python dependencies using `pip`:
-   ```bash
-   pip install -r requirements.txt
-   ```
 
-### Step 2: Launch the Application
+(*Last Revised 2017-12-30*)
 
-1. **Running the Program**
-   - Open a terminal, navigate to the application directory, and run the following command to start the program:
-   ```bash
-   python analyzer.py
-   ```
 
-2. **Troubleshooting**
-   - If dependencies are not installed correctly, run the following to install them manually:
-   ```bash
-   pip install numpy pandas pyinstaller xlsxwriter
-   ```
-
----
-
-## Linux Instructions
-
-### Step 1: Install Dependencies
-
-1. **Install Python**  
-   To install Python, use your package manager:
-   ```bash
-   sudo apt update
-   sudo apt install python3 python3-pip
-   ```
-
-2. **Install Ruby**  
-   Install Ruby using the following command:
-   ```bash
-   sudo apt install ruby
-   ```
-
-3. **Install Dependencies**
-   - Once Python and Ruby are installed, run:
-   ```bash
-   pip3 install -r requirements.txt
-   ```
-
-### Step 2: Launch the Application
-
-1. **Running the Program**
-   - Open a terminal, navigate to the application directory, and run the following:
-   ```bash
-   python3 analyzer.py
-   ```
-
-2. **Troubleshooting**
-   - If dependencies are missing, run:
-   ```bash
-   pip3 install numpy pandas pyinstaller xlsxwriter
-   ```
-
----
-
-## Creating a Desktop Shortcut
-
-### Windows
-
-1. Right-click on your Desktop and select **New > Shortcut**.
-2. In the location field, type the following:
-   ```bash
-   "C:\path\to\your\project\launch.bat"
-   ```
-3. Click **Next**, give the shortcut a name (e.g., "DarkFiberTools"), and click **Finish**.
-
-### macOS and Linux
-
-For macOS and Linux, you can create a desktop shortcut by creating a `.desktop` file.
-
-1. Open a text editor and create a new file with the following content:
-   ```bash
-   [Desktop Entry]
-   Version=1.0
-   Name=DarkFiberTools
-   Exec=python3 /path/to/your/project/analyzer.py
-   Icon=/path/to/icon.png
-   Terminal=true
-   Type=Application
-   Categories=Utility;
-   ```
-
-2. Save this file with a `.desktop` extension (e.g., `DarkFiberTools.desktop`).
-
-3. Make it executable by running:
-   ```bash
-   chmod +x /path/to/DarkFiberTools.desktop
-   ```
-
-4. Move the `.desktop` file to your Desktop directory:
-   ```bash
-   mv /path/to/DarkFiberTools.desktop ~/Desktop/
-   ```
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-- **Virtual Environment Not Found**:  
-  If you are on Windows and the virtual environment does not exist, you can manually create it by running:
-  ```bash
-  python -m venv venv
-  ```
-
-  Then activate it by running:
-  ```bash
-  .\venv\Scripts\activate
-  ```
-
-- **Dependency Installation Issues**:  
-  If the dependencies fail to install during setup, try manually installing them by running:
-  ```bash
-  pip install -r requirements.txt
-  ```
-
----
-
-That should cover the setup and usage of the application on Windows, macOS, and Linux systems! If you run into any issues or need further assistance, feel free to reach out.
