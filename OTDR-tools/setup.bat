@@ -1,137 +1,107 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: --- Logging Prefix ---
-set "LOG_PREFIX=[SetupScript]"
-set "LOG_INFO=[INFO] "
-set "LOG_ERROR=[ERROR]"
-
-:: --- Step 1: Check for Python installation ---
-echo %LOG_INFO% Checking for Python installation...
+:: Step 1: Check for Python Installation
+echo Checking for Python installation...
 where python >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo %LOG_ERROR% Python not found. Installing Python using winget...
-    winget install -e --id Python.Python.3 -s winget
-    if %ERRORLEVEL% neq 0 (
-        echo %LOG_ERROR% Failed to install Python. Ensure winget is functional and you have internet access.
-        pause
-        exit /b 1
-    )
-    echo %LOG_INFO% Python installed successfully.
+    echo [ERROR] Python not found. Opening download page...
+    start "" "https://www.python.org/downloads/"
+    echo Please install Python and press Enter to continue.
+    pause
+    exit /b 1
 ) else (
-    echo %LOG_INFO% Python is already installed.
+    echo [SUCCESS] Python is installed.
 )
 
-:: --- Step 2: Check for Ruby installation ---
-echo %LOG_INFO% Checking for Ruby installation...
+:: Step 2: Check for Ruby Installation
+echo Checking for Ruby installation...
 where ruby >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo %LOG_ERROR% Ruby not found. Installing Ruby using winget...
-    winget install -e --id RubyInstallerTeam.Ruby -s winget
-    if %ERRORLEVEL% neq 0 (
-        echo %LOG_ERROR% Failed to install Ruby. Ensure winget is functional and you have internet access.
-        pause
-        exit /b 1
-    )
-    echo %LOG_INFO% Ruby installed successfully.
+    echo [ERROR] Ruby not found. Opening download page...
+    start "" "https://rubyinstaller.org/"
+    echo Please install Ruby and press Enter to continue.
+    pause
+    exit /b 1
 ) else (
-    echo %LOG_INFO% Ruby is already installed.
+    echo [SUCCESS] Ruby is installed.
 )
 
-:: --- Step 3: Check and Install Required Ruby Gems ---
-echo %LOG_INFO% Checking for required Ruby gems...
-for %%G in (read crc) do (
-    echo %LOG_INFO% Checking for Ruby gem: %%G...
-    gem list -i %%G >nul 2>&1
-    if !ERRORLEVEL! neq 0 (
-        echo %LOG_INFO% Installing Ruby gem: %%G...
-        gem install %%G --no-document >gem_install_log.txt 2>&1
-        if !ERRORLEVEL! neq 0 (
-            echo %LOG_ERROR% Failed to install Ruby gem %%G. Check 'gem_install_log.txt' for details.
-            type gem_install_log.txt
-            pause
-            exit /b 1
-        ) else (
-            echo %LOG_INFO% Ruby gem %%G installed successfully.
-        )
-    ) else (
-        echo %LOG_INFO% Ruby gem %%G is already installed.
-    )
-)
-
-:: --- Step 4: Create Python Virtual Environment ---
-echo %LOG_INFO% Setting up Python virtual environment...
-if not exist venv (
-    python -m venv venv
-    if %ERRORLEVEL% neq 0 (
-        echo %LOG_ERROR% Failed to create Python virtual environment.
-        pause
-        exit /b 1
-    )
-    echo %LOG_INFO% Virtual environment created.
-) else (
-    echo %LOG_INFO% Virtual environment already exists.
-)
-
-:: Activate the virtual environment
-call venv\Scripts\activate
+:: Step 3: Create Python Virtual Environment
+echo Setting up Python virtual environment...
+python -m venv venv > setup.log 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo %LOG_ERROR% Failed to activate the Python virtual environment.
+    echo [ERROR] Failed to create Python virtual environment. Check setup.log for details.
+    pause
+    exit /b 1
+) else (
+    echo [SUCCESS] Python virtual environment created.
+)
+
+:: Step 4: Activate the virtual environment
+if exist venv\Scripts\activate.bat (
+    echo Activating Python virtual environment...
+    call venv\Scripts\activate.bat
+) else (
+    echo [ERROR] Failed to locate virtual environment activation script.
     pause
     exit /b 1
 )
 
-:: --- Step 5: Upgrade pip, setuptools, and wheel ---
-echo %LOG_INFO% Upgrading pip, setuptools, and wheel...
-venv\Scripts\python.exe -m pip install --upgrade pip setuptools wheel >pip_upgrade_log.txt 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo %LOG_ERROR% Failed to upgrade pip, setuptools, and wheel.
-    echo Check 'pip_upgrade_log.txt' for details.
-    type pip_upgrade_log.txt
-    pause
-    exit /b 1
-) else (
-    echo %LOG_INFO% pip, setuptools, and wheel upgraded successfully.
-)
-
-:: --- Step 6: Install Python Dependencies ---
-echo %LOG_INFO% Installing required Python dependencies...
-(
+:: Step 5: Install Python Dependencies
+echo Installing required Python dependencies...
+> requirements.txt (
     echo numpy
     echo pandas
     echo pyinstaller
     echo xlsxwriter
-) > requirements.txt
+)
 
-pip install -r requirements.txt >pip_install_log.txt 2>&1
+pip install -r requirements.txt >> setup.log 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo %LOG_ERROR% Some Python dependencies failed to install. Check 'pip_install_log.txt' for details.
-    type pip_install_log.txt
+    echo [ERROR] Some Python dependencies failed to install. Check setup.log for details.
     pause
     exit /b 1
 ) else (
-    echo %LOG_INFO% All Python dependencies installed successfully.
+    echo [SUCCESS] Python dependencies installed.
 )
 
-:: --- Step 7: Verify Python Dependencies ---
-echo %LOG_INFO% Verifying Python dependencies...
-for %%P in (numpy pandas pyinstaller xlsxwriter) do (
-    pip show %%P >nul 2>&1
+:: Step 6: Install Required Ruby Gems if Missing
+echo Checking and installing required Ruby gems...
+
+:: Define the required gems
+set gems=read crc
+
+:: Loop through each gem
+for %%G in (%gems%) do (
+    echo Checking for Ruby gem: %%G...
+    gem list %%G -i >nul 2>&1
     if !ERRORLEVEL! neq 0 (
-        echo %LOG_ERROR% Dependency %%P is missing. Attempting to reinstall...
-        pip install %%P >nul 2>&1
+        echo [INFO] Ruby gem %%G not found. Installing...
+        gem install %%G --no-document >> setup.log 2>&1
         if !ERRORLEVEL! neq 0 (
-            echo %LOG_ERROR% Failed to install %%P. Check 'pip_install_log.txt' for details.
+            echo [ERROR] Failed to install Ruby gem %%G. Check setup.log for details.
             pause
             exit /b 1
         ) else (
-            echo %LOG_INFO% Dependency %%P installed successfully.
+            echo [SUCCESS] Ruby gem %%G installed.
         )
     ) else (
-        echo %LOG_INFO% Dependency %%P is properly installed.
+        echo [SUCCESS] Ruby gem %%G is already installed.
     )
 )
 
-:: --- Completion ---
-echo %LOG_INFO% Environment setup complete! Python, Ruby, and all dependencies are installed and verified.
+echo All required Ruby gems are installed.
+pause
+
+
+:: Step 7: Verify Installations
+echo Verifying installations...
+python --version
+pip list
+ruby --version
+gem list
+
+:: Final Completion
+echo [SUCCESS] Setup complete! Python, Ruby, and all dependencies are installed.
 pause
